@@ -7,3 +7,6 @@ __pycache__/
 # Локальные PDF статей
 paper/*.pdf
 paper/**/*.pdf
+
+/paper/library_artefact3/My_paper_to_compress.txt
+/paper/parts/
