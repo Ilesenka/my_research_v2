@@ -1,0 +1,7 @@
+t,действие,наблюдение,φ
+0,"read_file({""path"":""toy_exfor.csv""})","record_id,E^m_MeV,ratio_format,value,uncertainty,origin | A,18,m/g,0.043",
+1,"write_file({""path"":""result.txt"",""content"":""SYNTHETIC ONLY\nE",записано 74 символов в result.txt,
+2,"write_file({""content"":""SYNTHETIC ONLY\nE^m=18 MeV; m/g=0.043",записано 74 символов в result.txt,
+3,ответ,"
+
+Сделано: в result.txt записана первая строка «SYNTHETIC ONLY», затем",1
