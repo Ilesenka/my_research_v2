@@ -20,3 +20,4 @@
 - `tasks/` — заметки задач и подзадач с условиями готовности и статусами.
 - `notes/` — заметки объектов работы: источников, обработок, результатов, проверок и ограничений.
 - `results/artefact4/source_review.md` — обзор статьи `paper/library_artefact3/My_paper_to_compress.pdf` как источника: реакции, продукты, энергии, формат IR, условия и ограничения.
+- `results/artefact4/isomeric_ratios.csv` — экспериментальные IR из таблицы 3 основной статьи и `results/artefact2/table.csv` по Палванову; TALYS исключён.
