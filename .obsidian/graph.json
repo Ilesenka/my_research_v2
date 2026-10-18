@@ -1,0 +1,27 @@
+{
+  "showAttachments": true,
+  "showOrphans": true,
+  "showArrow": true,
+  "colorGroups": [
+    {
+      "query": "path:ontology",
+      "color": {"a": 1, "rgb": 9474192}
+    },
+    {
+      "query": "[status:открыта] OR [status:\"в работе\"] OR [status:заблокирована]",
+      "color": {"a": 1, "rgb": 14254635}
+    },
+    {
+      "query": "path:tasks",
+      "color": {"a": 1, "rgb": 16761685}
+    },
+    {
+      "query": "[type:Обработка] OR [type:Проверка]",
+      "color": {"a": 1, "rgb": 1153422}
+    },
+    {
+      "query": "path:notes",
+      "color": {"a": 1, "rgb": 5987296}
+    }
+  ]
+}
