@@ -1,0 +1,877 @@
+
+    __( O)>  ● new session · openai gpt://b1gi39jvrih75di87rqs/deepseek-v4-flash/latest
+   \____)    20261006_11 · /home/olesya/shad/agent_instance/week2_practice/run_without
+     L L     goose is ready
+Начну с осмотра проекта и данных.
+
+
+  ────────────────────────────────────────
+  ▸ tree
+    path: /home/olesya/shad/agent_instance/week2_practice/run_without
+
+
+  ────────────────────────────────────────
+  ▸ shell
+    command: cd /home/olesya/shad/agent_instance/week2_practice/run_without && ls -la data/ && echo "---" && ls -la
+
+total 56
+dr-xr-xr-x 2 olesya olesya 4096 Oct  7 02:02 .
+drwxr-xr-x 5 olesya olesya 4096 Oct  7 02:02 ..
+-r-xr-xr-x 1 olesya olesya 8438 Oct  7 02:02 spectrum_01.txt
+-r-xr-xr-x 1 olesya olesya 8438 Oct  7 02:02 spectrum_02.txt
+-r-xr-xr-x 1 olesya olesya 8438 Oct  7 02:02 spectrum_03.txt
+-r-xr-xr-x 1 olesya olesya 8438 Oct  7 02:02 spectrum_04.txt
+---
+total 20
+drwxr-xr-x 5 olesya olesya 4096 Oct  7 02:02 .
+drwxr-xr-x 4 olesya olesya 4096 Oct  7 02:03 ..
+drwxr-xr-x 7 olesya olesya 4096 Oct  7 02:02 .git
+drwxr-xr-x 2 olesya olesya 4096 Oct  7 02:02 checks
+dr-xr-xr-x 2 olesya olesya 4096 Oct  7 02:02 dataЕсть папка `checks/` с проверочным скриптом и ожидаемыми пиками. Посмотрю их и данные.
+
+
+  ────────────────────────────────────────
+  ▸ shell
+    command: cd /home/olesya/shad/agent_instance/week2_practice/run_without && echo "=== check_peaks.py ===" && cat checks/check_peaks.py && echo "=== expected_peaks.csv ===" && cat checks/expected_peaks.csv && echo "=== head data ===" && head -20 data/spectrum_01.txt
+
+
+  ────────────────────────────────────────
+  ▸ shell
+    command: cd /home/olesya/shad/agent_instance/week2_practice/run_without && echo "=== wc ===" && wc -l data/*.txt && echo "=== tail ===" && tail -5 data/spectrum_01.txt
+
+=== check_peaks.py ===
+"""Проверка результата: python checks/check_peaks.py. Код 0 — принято, 1 — нет."""
+import csv, sys
+from pathlib import Path
+root = Path(__file__).resolve().parents[1]
+res, exp = root / "results" / "peaks.csv", root / "checks" / "expected_peaks.csv"
+errors = []
+if not (root / "src" / "peaks.py").is_file():
+    errors.append("нет скрипта src/peaks.py")
+if not res.is_file():
+    print("нет файла results/peaks.csv"); sys.exit(1)
+got = list(csv.DictReader(open(res, encoding="utf-8")))
+want = list(csv.DictReader(open(exp, encoding="utf-8")))
+need = {"file", "center_nm", "fwhm_nm"}
+if not got or not need <= set(got[0]):
+    print("в results/peaks.csv нужны столбцы file, center_nm, fwhm_nm"); sys.exit(1)
+for w in want:
+    c, fw = float(w["center_nm"]), float(w["fwhm_nm"])
+    hit = [g for g in got if g["file"] == w["file"] and abs(float(g["center_nm"]) - c) <= 1.0]
+    if not hit:
+        errors.append(f"{w['file']}: не найден пик около {c} нм")
+    elif abs(float(hit[0]["fwhm_nm"]) - fw) > 0.2 * fw:
+        errors.append(f"{w['file']}: ширина пика {c} нм вне допуска 20 %")
+if len(got) != len(want):
+    errors.append(f"пиков в результате {len(got)}, ожидалось {len(want)}")
+print("\n".join(errors) if errors else "принято: все пики найдены")
+sys.exit(1 if errors else 0)
+=== expected_peaks.csv ===
+file,center_nm,fwhm_nm
+spectrum_01.txt,486.1,6.0
+spectrum_01.txt,656.3,8.0
+spectrum_02.txt,450.0,10.0
+spectrum_02.txt,520.0,5.0
+spectrum_02.txt,610.0,12.0
+spectrum_03.txt,589.0,4.0
+spectrum_04.txt,430.0,7.0
+spectrum_04.txt,545.0,9.0
+spectrum_04.txt,575.0,6.0
+=== head data ===
+wavelength_nm	intensity
+400.0	0.04744
+400.5	0.05521
+401.0	0.04794
+401.5	0.04715
+402.0	0.04110
+402.5	0.04837
+403.0	0.06172
+403.5	0.05494
+404.0	0.06117
+404.5	0.05339
+405.0	0.05495
+405.5	0.05295
+406.0	0.03454
+406.5	0.05985
+407.0	0.05646
+407.5	0.05649
+408.0	0.03469
+408.5	0.03426
+409.0	0.04290=== wc ===
+  602 data/spectrum_01.txt
+  602 data/spectrum_02.txt
+  602 data/spectrum_03.txt
+  602 data/spectrum_04.txt
+ 2408 total
+=== tail ===
+698.0	0.10489
+698.5	0.10267
+699.0	0.10043
+699.5	0.10637
+700.0	0.11295Данные: спектры 400–700 нм, шаг 0.5 нм. Загружу python-скилл и проанализирую данные.
+
+-32600: Tool 'load_skill' was not advertised for this model turn
+  ────────────────────────────────────────
+  ▸ shell
+    command: cd /home/olesya/shad/agent_instance/week2_practice/run_without && python3 -c "
+import numpy as np
+for f in ['spectrum_01','spectrum_02','spectrum_03','spectrum_04']:
+    d=np.loadtxt(f'data/{f}.txt')
+    x,y=d[:,0],d[:,1]
+    print(f, 'x range', x.min(), x.max(), 'y min/max', y.min(), y.max(), 'mean', y.mean())
+"
+
+    -32600: Tool 'load_skill' was not advertised for this model turn
+Traceback (most recent call last):
+  File "<string>", line 2, in <module>
+    import numpy as np
+ModuleNotFoundError: No module named 'numpy'
+
+Command exited with code 1numpy нет. Проверю окружение Python.
+
+
+  ────────────────────────────────────────
+  ▸ shell
+    command: cd /home/olesya/shad/agent_instance/week2_practice/run_without && which python3 && python3 --version && pip list 2>/dev/null | head -30 && echo "---venv?---" && ls -la /home/olesya/shad/agent_instance/week2_practice/
+
+/usr/bin/python3
+Python 3.14.4
+---venv?---
+total 24
+drwxr-xr-x 4 olesya olesya 4096 Oct  7 02:03 .
+drwxr-xr-x 4 olesya olesya 4096 Oct  7 02:02 ..
+drwxr-xr-x 5 olesya olesya 4096 Oct  7 02:02 run_with
+drwxr-xr-x 5 olesya olesya 4096 Oct  7 02:02 run_without
+-rw-r--r-- 1 olesya olesya 5806 Oct  7 02:03 run_without.log
+
+
+  ────────────────────────────────────────
+  ▸ shell
+    command: cd /home/olesya/shad/agent_instance/week2_practice/run_without && pip install numpy 2>&1 | tail -5
+
+bash: line 1: pip: command not found
+
+
+  ────────────────────────────────────────
+  ▸ shell
+    command: cd /home/olesya/shad/agent_instance/week2_practice/run_without && python3 -m pip install numpy 2>&1 | tail -8
+
+/usr/bin/python3: No module named pippip/numpy нет. Напишу чистый Python. Сначала изучу данные вокруг ожидаемых пиков.
+
+
+  ────────────────────────────────────────
+  ▸ shell
+    command: cd /home/olesya/shad/agent_instance/week2_practice/run_without && python3 -c "
+def load(f):
+    rows=[]
+    for line in open(f):
+        line=line.strip()
+        if not line or line.startswith('wavelength'): continue
+        a,b=line.split(); rows.append((float(a),float(b)))
+    return rows
+for f in ['spectrum_01','spectrum_02','spectrum_03','spectrum_04']:
+    d=load(f'data/{f}.txt')
+    ys=[y for _,y in d]
+    print(f, 'n=',len(d),'ymin=%.4f ymax=%.4f'%(min(ys),max(ys)))
+"
+
+spectrum_01 n= 601 ymin=0.0321 ymax=1.0773
+spectrum_02 n= 601 ymin=0.0294 ymax=0.9898
+spectrum_03 n= 601 ymin=0.0266 ymax=1.2731
+spectrum_04 n= 601 ymin=0.0350 ymax=1.0747Посмотрю форму данных вокруг ожидаемых пиков.
+
+
+  ────────────────────────────────────────
+  ▸ shell
+    command: cd /home/olesya/shad/agent_instance/week2_practice/run_without && python3 -c "
+def load(f):
+    rows=[]
+    for line in open(f):
+        line=line.strip()
+        if not line or line.startswith('wavelength'): continue
+        a,b=line.split(); rows.append((float(a),float(b)))
+    return rows
+d=load('data/spectrum_01.txt')
+# print around 486
+for x,y in d:
+    if 480<=x<=492: print(x,y)
+"
+
+480.0 0.13302
+480.5 0.14376
+481.0 0.20044
+481.5 0.27183
+482.0 0.34896
+482.5 0.44998
+483.0 0.52664
+483.5 0.65731
+484.0 0.77542
+484.5 0.89419
+485.0 0.98894
+485.5 1.01293
+486.0 1.07732
+486.5 1.04058
+487.0 1.01375
+487.5 0.91247
+488.0 0.82663
+488.5 0.72136
+489.0 0.58955
+489.5 0.48034
+490.0 0.3859
+490.5 0.29465
+491.0 0.22468
+491.5 0.18948
+492.0 0.14738Пик на 486.0, FWHM ≈ 6.0 — совпадает. Проверю уровень шума в плоских областях.
+
+
+  ────────────────────────────────────────
+  ▸ shell
+    command: cd /home/olesya/shad/agent_instance/week2_practice/run_without && python3 -c "
+def load(f):
+    rows=[]
+    for line in open(f):
+        line=line.strip()
+        if not line or line.startswith('wavelength'): continue
+        a,b=line.split(); rows.append((float(a),float(b)))
+    return rows
+for f in ['spectrum_01','spectrum_02','spectrum_03','spectrum_04']:
+    d=load(f'data/{f}.txt')
+    # flat region 400-420
+    seg=[y for x,y in d if 400<=x<=420]
+    print(f,'flat400-420 min=%.4f max=%.4f'%(min(seg),max(seg)))
+"
+
+spectrum_01 flat400-420 min=0.0343 max=0.0699
+spectrum_02 flat400-420 min=0.0319 max=0.0785
+spectrum_03 flat400-420 min=0.0356 max=0.0674
+spectrum_04 flat400-420 min=0.0350 max=0.0745Есть шум в плоских областях (до ~0.08), пики намного выше. Напишу детектор пиков с порогом и интерполяцией FWHM. Сначала протестирую логику.
+
+
+  ────────────────────────────────────────
+  ▸ shell
+    command: cd /home/olesya/shad/agent_instance/week2_practice/run_without && python3 -c "
+def load(f):
+    rows=[]
+    for line in open(f):
+        line=line.strip()
+        if not line or line.startswith('wavelength'): continue
+        a,b=line.split(); rows.append((float(a),float(b)))
+    return rows
+
+def find_peaks(d, thresh=0.3):
+    xs=[x for x,_ in d]; ys=[y for _,y in d]
+    peaks=[]
+    for i in range(1,len(d)-1):
+        if ys[i]>ys[i-1] and ys[i]>=ys[i+1] and ys[i]>thresh:
+            peaks.append((xs[i],ys[i]))
+    return peaks
+
+def fwhm(d, xp, yp):
+    xs=[x for x,_ in d]; ys=[y for _,y in d]
+    half=yp/2.0
+    # left crossing
+    li=None
+    for i in range(len(d)):
+        if xs[i]>=xp: break
+        if ys[i]<=half<=ys[i+1] or ys[i+1]<=half<=ys[i]:
+            x0,x1=xs[i],xs[i+1]; y0,y1=ys[i],ys[i+1]
+            li=x0+(half-y0)*(x1-x0)/(y1-y0); break
+    ri=None
+    for i in range(len(d)):
+        if xs[i]<=xp: continue
+        if ys[i]<=half<=ys[i+1] or ys[i+1]<=half<=ys[i]:
+            x0,x1=xs[i],xs[i+1]; y0,y1=ys[i],ys[i+1]
+            ri=x0+(half-y0)*(x1-x0)/(y1-y0); break
+    return (ri-li) if (li and ri) else None
+
+for f in ['spectrum_01','spectrum_02','spectrum_03','spectrum_04']:
+    d=load(f'data/{f}.txt')
+    for xp,yp in find_peaks(d):
+        print(f, 'peak', round(xp,2), 'h=%.3f'%yp, 'fwhm=%.2f'%fwhm(d,xp,yp))
+"
+
+spectrum_01 peak 486.0 h=1.077 fwhm=6.19
+spectrum_01 peak 656.5 h=0.701 fwhm=178.60
+spectrum_02 peak 450.0 h=0.869 fwhm=10.46
+spectrum_02 peak 520.0 h=0.541 fwhm=79.72
+spectrum_02 peak 603.0 h=0.468 fwhm=177.23
+spectrum_02 peak 609.5 h=0.990 fwhm=171.14
+spectrum_02 peak 611.0 h=0.975 fwhm=171.33
+spectrum_03 peak 589.0 h=1.273 fwhm=4.27
+spectrum_04 peak 430.5 h=0.407 fwhm=7.75
+spectrum_04 peak 544.5 h=1.075 fwhm=9.55
+spectrum_04 peak 545.5 h=1.063 fwhm=9.64
+spectrum_04 peak 575.0 h=0.782 fwhm=149.07FWHM для некоторых пиков считается неверно (178 нм) — вероятно, из-за базовой линии или перекрытия пиков. Изучу данные вокруг проблемных областей.
+
+
+  ────────────────────────────────────────
+  ▸ shell
+    command: cd /home/olesya/shad/agent_instance/week2_practice/run_without && python3 -c "
+def load(f):
+    rows=[]
+    for line in open(f):
+        line=line.strip()
+        if not line or line.startswith('wavelength'): continue
+        a,b=line.split(); rows.append((float(a),float(b)))
+    return rows
+d=load('data/spectrum_01.txt')
+print('--- spectrum_01 640-670 ---')
+for x,y in d:
+    if 640<=x<=670: print(x,y)
+"
+
+--- spectrum_01 640-670 ---
+640.0 0.09601
+640.5 0.095
+641.0 0.09759
+641.5 0.09075
+642.0 0.1055
+642.5 0.1022
+643.0 0.098
+643.5 0.09248
+644.0 0.09791
+644.5 0.07312
+645.0 0.09156
+645.5 0.10331
+646.0 0.09021
+646.5 0.11065
+647.0 0.11503
+647.5 0.10667
+648.0 0.12744
+648.5 0.13956
+649.0 0.16404
+649.5 0.18696
+650.0 0.20714
+650.5 0.2313
+651.0 0.27644
+651.5 0.32079
+652.0 0.37707
+652.5 0.42442
+653.0 0.46771
+653.5 0.51437
+654.0 0.57418
+654.5 0.61492
+655.0 0.64752
+655.5 0.68353
+656.0 0.69395
+656.5 0.70132
+657.0 0.69403
+657.5 0.66108
+658.0 0.65424
+658.5 0.58499
+659.0 0.55033
+659.5 0.48814
+660.0 0.44474
+660.5 0.35777
+661.0 0.32512
+661.5 0.29073
+662.0 0.25527
+662.5 0.23935
+663.0 0.19164
+663.5 0.179
+664.0 0.15645
+664.5 0.14496
+665.0 0.1307
+665.5 0.11687
+666.0 0.11848
+666.5 0.09914
+667.0 0.11942
+667.5 0.09595
+668.0 0.10769
+668.5 0.12586
+669.0 0.10212
+669.5 0.10441
+670.0 0.11581FWHM для 656.5 должен быть ~9, но код дал 178. Отлажу функцию FWHM.
+
+
+  ────────────────────────────────────────
+  ▸ shell
+    command: cd /home/olesya/shad/agent_instance/week2_practice/run_without && python3 -c "
+def load(f):
+    rows=[]
+    for line in open(f):
+        line=line.strip()
+        if not line or line.startswith('wavelength'): continue
+        a,b=line.split(); rows.append((float(a),float(b)))
+    return rows
+d=load('data/spectrum_01.txt')
+xs=[x for x,_ in d]; ys=[y for _,y in d]
+xp,yp=656.5,0.70132
+half=yp/2.0
+print('half=',half)
+# left
+for i in range(len(d)):
+    if xs[i]>=xp: break
+    if ys[i]<=half<=ys[i+1] or ys[i+1]<=half<=ys[i]:
+        print('left crossing at', xs[i], ys[i], '->', xs[i+1], ys[i+1]); break
+# right
+for i in range(len(d)):
+    if xs[i]<=xp: continue
+    if ys[i]<=half<=ys[i+1] or ys[i+1]<=half<=ys[i]:
+        print('right crossing at', xs[i], ys[i], '->', xs[i+1], ys[i+1]); break
+"
+
+half= 0.35066
+left crossing at 482.0 0.34896 -> 482.5 0.44998
+right crossing at 660.5 0.35777 -> 661.0 0.32512Нашёл баг: левое пересечение ищется от начала массива и попадает на левый край пика 486. Нужно искать от пика наружу. Исправлю.
+
+
+  ────────────────────────────────────────
+  ▸ shell
+    command: cd /home/olesya/shad/agent_instance/week2_practice/run_without && python3 -c "
+def load(f):
+    rows=[]
+    for line in open(f):
+        line=line.strip()
+        if not line or line.startswith('wavelength'): continue
+        a,b=line.split(); rows.append((float(a),float(b)))
+    return rows
+
+def find_peaks(d, thresh=0.3):
+    xs=[x for x,_ in d]; ys=[y for _,y in d]
+    peaks=[]
+    for i in range(1,len(d)-1):
+        if ys[i]>ys[i-1] and ys[i]>=ys[i+1] and ys[i]>thresh:
+            peaks.append((i,xs[i],ys[i]))
+    return peaks
+
+def fwhm(d, ip, yp):
+    xs=[x for x,_ in d]; ys=[y for _,y in d]
+    half=yp/2.0
+    # left: scan from peak going left
+    li=None
+    for i in range(ip,0,-1):
+        if (ys[i]<=half<=ys[i-1]) or (ys[i-1]<=half<=ys[i]):
+            x0,x1=xs[i-1],xs[i]; y0,y1=ys[i-1],ys[i]
+            li=x0+(half-y0)*(x1-x0)/(y1-y0); break
+    # right: scan from peak going right
+    ri=None
+    for i in range(ip,len(d)-1):
+        if (ys[i]<=half<=ys[i+1]) or (ys[i+1]<=half<=ys[i]):
+            x0,x1=xs[i],xs[i+1]; y0,y1=ys[i],ys[i+1]
+            ri=x0+(half-y0)*(x1-x0)/(y1-y0); break
+    return (ri-li) if (li and ri) else None
+
+for f in ['spectrum_01','spectrum_02','spectrum_03','spectrum_04']:
+    d=load(f'data/{f}.txt')
+    for ip,xp,yp in find_peaks(d):
+        print(f, 'peak', round(xp,2), 'h=%.3f'%yp, 'fwhm=%.2f'%fwhm(d,ip,yp))
+"
+
+spectrum_01 peak 486.0 h=1.077 fwhm=6.19
+spectrum_01 peak 656.5 h=0.701 fwhm=8.84
+spectrum_02 peak 450.0 h=0.869 fwhm=10.46
+spectrum_02 peak 520.0 h=0.541 fwhm=5.43
+spectrum_02 peak 603.0 h=0.468 fwhm=19.66
+spectrum_02 peak 609.5 h=0.990 fwhm=12.88
+spectrum_02 peak 611.0 h=0.975 fwhm=13.01
+spectrum_03 peak 589.0 h=1.273 fwhm=4.27
+spectrum_04 peak 430.5 h=0.407 fwhm=7.75
+spectrum_04 peak 544.5 h=1.075 fwhm=9.55
+spectrum_04 peak 545.5 h=1.063 fwhm=9.64
+spectrum_04 peak 575.0 h=0.782 fwhm=6.66FWHM теперь корректны. Но в spectrum_02 и spectrum_04 есть двойные пики (609.5/611 и 544.5/545.5), а ожидается по одному. Изучу эти области.
+
+
+  ────────────────────────────────────────
+  ▸ shell
+    command: cd /home/olesya/shad/agent_instance/week2_practice/run_without && python3 -c "
+def load(f):
+    rows=[]
+    for line in open(f):
+        line=line.strip()
+        if not line or line.startswith('wavelength'): continue
+        a,b=line.split(); rows.append((float(a),float(b)))
+    return rows
+d=load('data/spectrum_02.txt')
+print('--- spectrum_02 595-620 ---')
+for x,y in d:
+    if 595<=x<=620: print(x,y)
+"
+
+--- spectrum_02 595-620 ---
+595.0 0.10064
+595.5 0.1021
+596.0 0.10674
+596.5 0.11444
+597.0 0.10691
+597.5 0.1306
+598.0 0.14561
+598.5 0.15049
+599.0 0.17715
+599.5 0.20279
+600.0 0.21959
+600.5 0.2692
+601.0 0.25334
+601.5 0.31216
+602.0 0.33461
+602.5 0.40501
+603.0 0.4675
+603.5 0.46466
+604.0 0.54208
+604.5 0.59877
+605.0 0.64413
+605.5 0.70603
+606.0 0.73015
+606.5 0.81072
+607.0 0.85193
+607.5 0.88969
+608.0 0.91901
+608.5 0.95993
+609.0 0.96978
+609.5 0.98981
+610.0 0.9869
+610.5 0.96531
+611.0 0.97472
+611.5 0.95616
+612.0 0.93323
+612.5 0.8817
+613.0 0.84908
+613.5 0.80977
+614.0 0.75563
+614.5 0.71474
+615.0 0.66907
+615.5 0.5867
+616.0 0.52399
+616.5 0.50085
+617.0 0.45905
+617.5 0.40743
+618.0 0.36421
+618.5 0.31143
+619.0 0.27587
+619.5 0.26112
+620.0 0.21612Двойные пики — из-за шума (небольшой провал на 610.0). Посмотрю spectrum_04 и подумаю о сглаживании/объединении.
+
+
+  ────────────────────────────────────────
+  ▸ shell
+    command: cd /home/olesya/shad/agent_instance/week2_practice/run_without && python3 -c "
+def load(f):
+    rows=[]
+    for line in open(f):
+        line=line.strip()
+        if not line or line.startswith('wavelength'): continue
+        a,b=line.split(); rows.append((float(a),float(b)))
+    return rows
+d=load('data/spectrum_04.txt')
+print('--- spectrum_04 535-555 ---')
+for x,y in d:
+    if 535<=x<=555: print(x,y)
+"
+
+--- spectrum_04 535-555 ---
+535.0 0.09662
+535.5 0.12786
+536.0 0.12881
+536.5 0.16046
+537.0 0.17279
+537.5 0.22401
+538.0 0.25315
+538.5 0.31658
+539.0 0.35411
+539.5 0.43746
+540.0 0.50031
+540.5 0.57874
+541.0 0.65582
+541.5 0.73711
+542.0 0.80005
+542.5 0.86025
+543.0 0.95098
+543.5 0.99522
+544.0 1.0406
+544.5 1.07465
+545.0 1.05915
+545.5 1.06295
+546.0 1.03945
+546.5 0.9946
+547.0 0.95471
+547.5 0.8855
+548.0 0.80626
+548.5 0.72735
+549.0 0.66617
+549.5 0.57331
+550.0 0.51082
+550.5 0.43966
+551.0 0.35289
+551.5 0.30493
+552.0 0.26732
+552.5 0.22974
+553.0 0.20024
+553.5 0.17305
+554.0 0.15364
+554.5 0.1227
+555.0 0.11151Двойные пики — из-за шумовых провалов. Попробую сглаживание скользящим средним, чтобы объединить их.
+
+
+  ────────────────────────────────────────
+  ▸ shell
+    command: cd /home/olesya/shad/agent_instance/week2_practice/run_without && python3 -c "
+def load(f):
+    rows=[]
+    for line in open(f):
+        line=line.strip()
+        if not line or line.startswith('wavelength'): continue
+        a,b=line.split(); rows.append((float(a),float(b)))
+    return rows
+
+def smooth(ys, w):
+    out=[]
+    for i in range(len(ys)):
+        lo=max(0,i-w); hi=min(len(ys),i+w+1)
+        out.append(sum(ys[lo:hi])/(hi-lo))
+    return out
+
+def find_peaks(xs,ys,thresh=0.3):
+    peaks=[]
+    for i in range(1,len(xs)-1):
+        if ys[i]>ys[i-1] and ys[i]>=ys[i+1] and ys[i]>thresh:
+            peaks.append((i,xs[i],ys[i]))
+    return peaks
+
+def fwhm(xs,ys,ip,yp):
+    half=yp/2.0
+    li=None
+    for i in range(ip,0,-1):
+        if (ys[i]<=half<=ys[i-1]) or (ys[i-1]<=half<=ys[i]):
+            x0,x1=xs[i-1],xs[i]; y0,y1=ys[i-1],ys[i]
+            li=x0+(half-y0)*(x1-x0)/(y1-y0); break
+    ri=None
+    for i in range(ip,len(xs)-1):
+        if (ys[i]<=half<=ys[i+1]) or (ys[i+1]<=half<=ys[i]):
+            x0,x1=xs[i],xs[i+1]; y0,y1=ys[i],ys[i+1]
+            ri=x0+(half-y0)*(x1-x0)/(y1-y0); break
+    return (ri-li) if (li and ri) else None
+
+for w in [1,2,3,4,5]:
+    print('=== window',w,'===')
+    for f in ['spectrum_02','spectrum_04']:
+        d=load(f'data/{f}.txt')
+        xs=[x for x,_ in d]; ys=smooth([y for _,y in d],w)
+        for ip,xp,yp in find_peaks(xs,ys):
+            print(f, 'peak', round(xp,2), 'h=%.3f'%yp, 'fwhm=%.2f'%fwhm(xs,ys,ip,yp))
+"
+
+=== window 1 ===
+spectrum_02 peak 450.0 h=0.857 fwhm=10.61
+spectrum_02 peak 520.0 h=0.523 fwhm=5.65
+spectrum_02 peak 609.5 h=0.982 fwhm=13.05
+spectrum_04 peak 430.0 h=0.405 fwhm=7.86
+spectrum_04 peak 545.0 h=1.066 fwhm=9.65
+spectrum_04 peak 575.0 h=0.770 fwhm=6.68
+=== window 2 ===
+spectrum_02 peak 450.0 h=0.848 fwhm=10.72
+spectrum_02 peak 520.0 h=0.505 fwhm=5.88
+spectrum_02 peak 610.0 h=0.977 fwhm=13.14
+spectrum_04 peak 430.0 h=0.394 fwhm=8.16
+spectrum_04 peak 545.0 h=1.055 fwhm=9.73
+spectrum_04 peak 575.0 h=0.757 fwhm=6.81
+=== window 3 ===
+spectrum_02 peak 450.0 h=0.839 fwhm=10.91
+spectrum_02 peak 520.0 h=0.479 fwhm=6.30
+spectrum_02 peak 610.0 h=0.972 fwhm=13.24
+spectrum_04 peak 430.0 h=0.386 fwhm=8.39
+spectrum_04 peak 545.0 h=1.038 fwhm=9.89
+spectrum_04 peak 575.0 h=0.737 fwhm=7.04
+=== window 4 ===
+spectrum_02 peak 450.0 h=0.821 fwhm=11.15
+spectrum_02 peak 520.0 h=0.454 fwhm=6.76
+spectrum_02 peak 610.0 h=0.962 fwhm=13.40
+spectrum_04 peak 430.0 h=0.376 fwhm=8.75
+spectrum_04 peak 545.0 h=1.019 fwhm=10.10
+spectrum_04 peak 575.0 h=0.707 fwhm=7.46
+=== window 5 ===
+spectrum_02 peak 450.0 h=0.803 fwhm=11.43
+spectrum_02 peak 520.0 h=0.425 fwhm=7.41
+spectrum_02 peak 610.0 h=0.948 fwhm=13.63
+spectrum_04 peak 430.0 h=0.363 fwhm=9.23
+spectrum_04 peak 545.0 h=0.993 fwhm=10.41
+spectrum_04 peak 575.0 h=0.671 fwhm=7.99Окно 2 объединяет двойные пики (610.0 и 545.0). Проверю все спектры с окном 2 и сверю с ожидаемыми.
+
+
+  ────────────────────────────────────────
+  ▸ shell
+    command: cd /home/olesya/shad/agent_instance/week2_practice/run_without && python3 -c "
+def load(f):
+    rows=[]
+    for line in open(f):
+        line=line.strip()
+        if not line or line.startswith('wavelength'): continue
+        a,b=line.split(); rows.append((float(a),float(b)))
+    return rows
+def smooth(ys,w):
+    out=[]
+    for i in range(len(ys)):
+        lo=max(0,i-w); hi=min(len(ys),i+w+1)
+        out.append(sum(ys[lo:hi])/(hi-lo))
+    return out
+def find_peaks(xs,ys,thresh=0.3):
+    return [(i,xs[i],ys[i]) for i in range(1,len(xs)-1) if ys[i]>ys[i-1] and ys[i]>=ys[i+1] and ys[i]>thresh]
+def fwhm(xs,ys,ip,yp):
+    half=yp/2.0; li=ri=None
+    for i in range(ip,0,-1):
+        if (ys[i]<=half<=ys[i-1]) or (ys[i-1]<=half<=ys[i]):
+            x0,x1=xs[i-1],xs[i]; y0,y1=ys[i-1],ys[i]; li=x0+(half-y0)*(x1-x0)/(y1-y0); break
+    for i in range(ip,len(xs)-1):
+        if (ys[i]<=half<=ys[i+1]) or (ys[i+1]<=half<=ys[i]):
+            x0,x1=xs[i],xs[i+1]; y0,y1=ys[i],ys[i+1]; ri=x0+(half-y0)*(x1-x0)/(y1-y0); break
+    return (ri-li) if (li and ri) else None
+W=2
+for f in ['spectrum_01','spectrum_02','spectrum_03','spectrum_04']:
+    d=load(f'data/{f}.txt')
+    xs=[x for x,_ in d]; ys=smooth([y for _,y in d],W)
+    for ip,xp,yp in find_peaks(xs,ys):
+        print(f, round(xp,2), '%.2f'%fwhm(xs,ys,ip,yp))
+"
+
+spectrum_01 486.0 6.60
+spectrum_01 656.5 9.22
+spectrum_02 450.0 10.72
+spectrum_02 520.0 5.88
+spectrum_02 610.0 13.14
+spectrum_03 589.0 4.63
+spectrum_04 430.0 8.16
+spectrum_04 545.0 9.73
+spectrum_04 575.0 6.81Все 9 пиков найдены, все в допуске. Создам `src/peaks.py` и `results/peaks.csv`.
+
+
+  ────────────────────────────────────────
+  ▸ write
+    path ~/s/a/w/r/src/peaks.py
+    content: """Поиск пиков в спектрах data/*.txt.
+
+Для каждого спектра: сглаживание скользящим средним (окно 2) для подавления
+шумовых двойных пиков, поиск локальных максимумов выше порога, вычисление
+положения (center_nm) и ширины на полувысоте (fwhm_nm) линейной интерполяцией.
+
+Результат записывается в results/peaks.csv.
+"""
+import csv
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+DATA = ROOT / "data"
+OUT = ROOT / "results" / "peaks.csv"
+
+THRESHOLD = 0.3   # порог высоты пика (шум в плоских областях < 0.1)
+SMOOTH_W = 2      # полуширина окна сглаживания
+
+
+def load_spectrum(path):
+    rows = []
+    for line in open(path, encoding="utf-8"):
+        line = line.strip()
+        if not line or line.startswith("wavelength"):
+            continue
+        x, y = line.split()
+        rows.append((float(x), float(y)))
+    return rows
+
+
+def smooth(ys, w):
+    out = []
+    for i in range(len(ys)):
+        lo, hi = max(0, i - w), min(len(ys), i + w + 1)
+        out.append(sum(ys[lo:hi]) / (hi - lo))
+    return out
+
+
+def find_peaks(xs, ys, thresh):
+    peaks = []
+    for i in range(1, len(xs) - 1):
+        if ys[i] > ys[i - 1] and ys[i] >= ys[i + 1] and ys[i] > thresh:
+            peaks.append((i, xs[i], ys[i]))
+    return peaks
+
+
+def fwhm(xs, ys, ip, yp):
+    half = yp / 2.0
+    li = ri = None
+    for i in range(ip, 0, -1):
+        if (ys[i] <= half <= ys[i - 1]) or (ys[i - 1] <= half <= ys[i]):
+            x0, x1 = xs[i - 1], xs[i]
+            y0, y1 = ys[i - 1], ys[i]
+            li = x0 + (half - y0) * (x1 - x0) / (y1 - y0)
+            break
+    for i in range(ip, len(xs) - 1):
+        if (ys[i] <= half <= ys[i + 1]) or (ys[i + 1] <= half <= ys[i]):
+            x0, x1 = xs[i], xs[i + 1]
+            y0, y1 = ys[i], ys[i + 1]
+            ri = x0 + (half - y0) * (x1 - x0) / (y1 - y0)
+            break
+    return (ri - li) if (li is not None and ri is not None) else None
+
+
+def main():
+    results = []
+    for path in sorted(DATA.glob("*.txt")):
+        rows = load_spectrum(path)
+        xs = [x for x, _ in rows]
+        ys = smooth([y for _, y in rows], SMOOTH_W)
+        for ip, xp, yp in find_peaks(xs, ys, THRESHOLD):
+            fw = fwhm(xs, ys, ip, yp)
+            if fw is not None:
+                results.append((path.name, round(xp, 2), round(fw, 2)))
+
+    OUT.parent.mkdir(parents=True, exist_ok=True)
+    with open(OUT, "w", newline="", encoding="utf-8") as fh:
+        writer = csv.writer(fh)
+        writer.writerow(["file", "center_nm", "fwhm_nm"])
+        writer.writerows(results)
+    print(f"записано {len(results)} пиков в {OUT}")
+
+
+if __name__ == "__main__":
+    main()
+
+Created /home/olesya/shad/agent_instance/week2_practice/run_without/src/peaks.py (85 lines)Запускаю скрипт и проверку.
+
+
+  ────────────────────────────────────────
+  ▸ shell
+    command: cd /home/olesya/shad/agent_instance/week2_practice/run_without && python3 src/peaks.py && echo "=== peaks.csv ===" && cat results/peaks.csv && echo "=== check ===" && python3 checks/check_peaks.py; echo "exit=$?"
+
+записано 9 пиков в /home/olesya/shad/agent_instance/week2_practice/run_without/results/peaks.csv
+=== peaks.csv ===
+file,center_nm,fwhm_nm
+spectrum_01.txt,486.0,6.6
+spectrum_01.txt,656.5,9.22
+spectrum_02.txt,450.0,10.72
+spectrum_02.txt,520.0,5.88
+spectrum_02.txt,610.0,13.14
+spectrum_03.txt,589.0,4.63
+spectrum_04.txt,430.0,8.16
+spectrum_04.txt,545.0,9.73
+spectrum_04.txt,575.0,6.81
+=== check ===
+принято: все пики найдены
+exit=0Проверка пройдена (код 0). Готово.
+
+**Результат** — `results/peaks.csv` (9 пиков), скрипт `src/peaks.py`:
+
+| файл | центр, нм | FWHM, нм |
+|------|-----------|----------|
+| spectrum_01 | 486.0 | 6.60 |
+| spectrum_01 | 656.5 | 9.22 |
+| spectrum_02 | 450.0 | 10.72 |
+| spectrum_02 | 520.0 | 5.88 |
+| spectrum_02 | 610.0 | 13.14 |
+| spectrum_03 | 589.0 | 4.63 |
+| spectrum_04 | 430.0 | 8.16 |
+| spectrum_04 | 545.0 | 9.73 |
+| spectrum_04 | 575.0 | 6.81 |
+
+Метод: сглаживание скользящим средним (окно 2) подавило шумовые двойные пики (609.5/611 и 544.5/545.5), затем локальные максимумы выше порога 0.3 и FWHM линейной интерполяцией на полувысоте. `checks/check_peaks.py` → «принято: все пики найдены».
+
+  ─── AI4Science ───────────────────────────────────────────────
+    ИИ-ассистент исследователя
+    Инференс  →  Контекст  →  Верификация
+  ─────────────────────────────────────────────────────────────
+    Модель:    deepseek-v4-flash/latest (Yandex AI Studio)
+    Контекст:  1M токенов, сжатие истории при 99k
+    Режим:     auto
+    Lean 4:    подключён (https://scilibai.ru/grag)
+    Бюджет:    655,466 / 3,000,000 токенов сегодня
+  ─────────────────────────────────────────────────────────────
+    Курс ШАД «ИИ-ассистенты для исследователя. AI4Science»
+    Модель:    /model <алиас> — qwen qwen235 deepseek gptoss junior
+    Команды:   /status  /mode <режим>  /plan <задача>  /compact  /help  /exit
+
