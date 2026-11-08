@@ -1,0 +1,123 @@
+G3 — границы отбора, неизвестные значения, приоритет excluded, сохранение
+принятых записей при расширении диапазона
+Вспомогательная сессия G3, 2026-11-08
+Рабочий каталог: /home/olesya/my_research_v2
+Окружение: ~/venvs/ai4science-week5
+
+1. ШТАТНАЯ ПРОВЕРКА (попытка 1)
+
+Команда:
+  python -B -m pytest checks/artefact7 -q -k selection_rules -p no:cacheprovider
+
+Вывод:
+  ..                                                                       [100%]
+  2 passed, 13 deselected in 0.21s
+
+Код завершения: 0
+
+Отобраны два теста: test_selection_rules (свойство G3) и параметризованный
+случай selection_rules в test_detects_mutation (G8 для той же проверки).
+
+2. НЕЗАВИСИМАЯ ПРОВЕРКА
+
+Скрипт выполнялся из heredoc, файлов в проекте не создавал. Схема строки
+взята из заголовка initial_data/artefact7/EXFOR_table_with_IR.csv (70 колонок),
+а не из тестового файла. Правило отбора сформулировано заново по SUBGOALS.md:
+  zflag = unknown при Z=None, иначе pass при z_min <= Z <= z_max, иначе fail;
+  eflag = unknown при E=None, иначе pass при e_min <= E <= e_max, иначе fail;
+  excluded, если хотя бы один флаг fail; in_scope, если оба pass; иначе pending.
+Затем строка с этими полями подавалась в реальный check_point верификатора;
+ожидалось отсутствие ошибки FILTER_LOGIC и неизменность строки.
+
+2.1 Включённые границы (Z = 60, 80; E = 10, 60 МэВ)
+
+  случай                Z     E      статус    zflag   eflag
+  Z=60 нижняя граница   60    35     in_scope  pass    pass
+  Z=80 верхняя граница  80    35     in_scope  pass    pass
+  E=10 нижняя граница   70    10     in_scope  pass    pass
+  E=60 верхняя граница  70    60     in_scope  pass    pass
+  обе границы           60    10     in_scope  pass    pass
+  обе границы 2         80    60     in_scope  pass    pass
+
+Границы включены: значения ровно на границе дают in_scope, FILTER_LOGIC нет.
+
+2.2 Значения сразу за границей
+
+  Z=59                  59    35     excluded  fail    pass
+  Z=81                  81    35     excluded  fail    pass
+  E=9.999               70    9.999  excluded  pass    fail
+  E=60.001              70    60.001 excluded  pass    fail
+
+2.3 Неизвестные значения
+
+  Z неизвестен          None  35     pending   unknown pass
+  E неизвестен          70    None   pending   pass    unknown
+  оба неизвестны        None  None   pending   unknown unknown
+
+Неизвестное значение не превращается ни в pass, ни в fail: статус pending,
+флаг unknown, FILTER_LOGIC отсутствует.
+
+2.4 Приоритет excluded над pending
+
+  Z=59 + E неизвестен   59    None   excluded  fail    unknown
+  Z неизвестен + E=9.999 None 9.999  excluded  unknown fail
+  Z=81 + E неизвестен   81    None   excluded  fail    unknown
+  Z неизвестен + E=60.001 None 60.001 excluded unknown fail
+
+Достоверный fail одного фильтра даёт excluded, даже если второй фильтр
+неизвестен. Приоритет excluded подтверждён.
+
+2.5 Расширение диапазона (Z = 50–90, E = 0–100 МэВ)
+
+Все шесть записей, принятых в исходном диапазоне, остались in_scope.
+Записи, исключённые только по границам (Z=59, Z=81, E=9.999, E=60.001),
+в расширенном диапазоне стали in_scope — принятые записи не теряются.
+Записи с неизвестным значением остались pending. FILTER_LOGIC нет ни в одном
+случае.
+
+2.6 Прямая проверка filter_value
+
+  filter_value(60, 60, 80)      = pass
+  filter_value(80, 60, 80)      = pass
+  filter_value(59, 60, 80)      = fail
+  filter_value(81, 60, 80)      = fail
+  filter_value(None, 60, 80)    = unknown
+  filter_value(10, 10, 60)      = pass
+  filter_value(60, 10, 60)      = pass
+  filter_value(9.999, 10, 60)   = fail
+  filter_value(60.001, 10, 60)  = fail
+
+2.7 Чувствительность к подмене статуса
+
+  in_scope -> excluded              FILTER_LOGIC обнаружена
+  excluded -> in_scope              FILTER_LOGIC обнаружена
+  pending -> in_scope               FILTER_LOGIC обнаружена
+  excluded -> pending (приоритет)   FILTER_LOGIC обнаружена
+  zflag pass -> unknown             FILTER_LOGIC обнаружена
+
+2.8 Сохранение строки
+
+Во всех прогонах строка до и после check_point совпадала (сравнение словаря
+целиком). Верификатор не переписывает поданное измерение.
+
+Итог независимой проверки: 0 расхождений, код завершения 0.
+
+3. ЗАКЛЮЧЕНИЕ
+
+G3 подтверждена: границы Z = 60–80 и E = 10–60 МэВ включены; неизвестные
+значения дают pending при отсутствии достоверного fail; excluded имеет
+приоритет над pending; расширение диапазона не исключает ранее принятые
+записи; подмена статуса обнаруживается. Штатный тест проходит (2 passed,
+код 0), независимая проверка расхождений не выявила.
+
+4. ОГРАНИЧЕНИЯ
+
+- Проверка выполнена на синтетических строках в памяти. Реальный CSV
+  initial_data/artefact7/EXFOR_table_with_IR.csv использован только как
+  источник схемы колонок; полный аудит таблицы не выполнялся.
+- Словарь, связанные таблицы и исходные ENTRY в проверку не вовлекались.
+- Первый прогон независимого скрипта (попытка 2 в ATTEMPTS.md) завершился
+  кодом 1 из-за ошибки стенда: check_point не вычисляет статус, а сверяет
+  его с уже заполненной строкой, поэтому поля оставались пустыми. Это
+  дефект стенда, а не верификатора; после заполнения полей по независимо
+  сформулированному правилу расхождений не осталось.
