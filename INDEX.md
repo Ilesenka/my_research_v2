@@ -34,3 +34,6 @@
 - `initial_data/artefact7/EXFOR_table_with_IR.csv` — основная таблица EXFOR; исходные данные не изменять.
 - `checks/artefact7/verify_exfor.py` — верификатор EXFOR.
 - `checks/artefact7/test_exfor_properties.py` — семь групп тестов на свойствах, семь проверок обнаружения внесённых ошибок и дополнительная проверка пустых исходников.
+- `results/artefact7/test_exfor_properties.txt` — отчёты веток, коды завершения и ограничения покрытия.
+- `ATTEMPTS.md` — объединённые фактические попытки G1–G8 и проверка результатов основной сессией.
+
