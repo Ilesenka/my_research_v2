@@ -1,0 +1,483 @@
+........................................................................ [ 39%]
+..............................................................FFFFFFFFFF [ 79%]
+FFFFFFFFFFFFFFFFF.....................                                   [100%]
+=================================== FAILURES ===================================
+__________________________ test_fine_grid_accuracy[A] __________________________
+
+case = {'e_th': 8.0, 'e_max': 20.0, 'sigma0': 120.0, 'w0': 1.0}
+
+    def test_fine_grid_accuracy(case):
+        """На конечной сетке относительная погрешность не больше 0,01%."""
+        exact = case["sigma0"] / 3.0
+        result = average_at(case, n=320)
+        relative_error = abs(result - exact) / abs(exact)
+>       assert relative_error <= 1e-4, f"Относительная погрешность: {relative_error}"
+E       AssertionError: Относительная погрешность: 0.003125
+E       assert 0.003125 <= 0.0001
+
+checks/artefact6/test_numerics.py:58: AssertionError
+__________________________ test_fine_grid_accuracy[B] __________________________
+
+case = {'e_th': 10.0, 'e_max': 30.0, 'sigma0': 60.0, 'w0': 5.0}
+
+    def test_fine_grid_accuracy(case):
+        """На конечной сетке относительная погрешность не больше 0,01%."""
+        exact = case["sigma0"] / 3.0
+        result = average_at(case, n=320)
+        relative_error = abs(result - exact) / abs(exact)
+>       assert relative_error <= 1e-4, f"Относительная погрешность: {relative_error}"
+E       AssertionError: Относительная погрешность: 0.003125
+E       assert 0.003125 <= 0.0001
+
+checks/artefact6/test_numerics.py:58: AssertionError
+__________________________ test_fine_grid_accuracy[C] __________________________
+
+case = {'e_th': 12.0, 'e_max': 60.0, 'sigma0': 240.0, 'w0': 10.0}
+
+    def test_fine_grid_accuracy(case):
+        """На конечной сетке относительная погрешность не больше 0,01%."""
+        exact = case["sigma0"] / 3.0
+        result = average_at(case, n=320)
+        relative_error = abs(result - exact) / abs(exact)
+>       assert relative_error <= 1e-4, f"Относительная погрешность: {relative_error}"
+E       AssertionError: Относительная погрешность: 0.003125
+E       assert 0.003125 <= 0.0001
+
+checks/artefact6/test_numerics.py:58: AssertionError
+_______________________ test_second_order_convergence[A] _______________________
+
+case = {'e_th': 8.0, 'e_max': 20.0, 'sigma0': 120.0, 'w0': 1.0}
+
+    def test_second_order_convergence(case):
+        """Ошибка убывает, а все пять оценок порядка лежат в [1,9; 2,1]."""
+        exact = case["sigma0"] / 3.0
+        errors = np.array([abs(average_at(case, n) - exact) for n in GRID_SIZES])
+        assert np.isfinite(errors).all()
+        assert np.all(errors > 0), "Для оценки порядка нужны положительные ошибки"
+        assert np.all(np.diff(errors) < 0), f"Погрешность не убывает: {errors}"
+        orders = np.log2(errors[:-1] / errors[1:])
+        assert np.isfinite(orders).all()
+>       assert np.all((orders >= 1.9) & (orders <= 2.1)), f"Порядки: {orders}"
+E       AssertionError: Порядки: [1. 1. 1. 1. 1.]
+E       assert np.False_
+E        +  where np.False_ = <function all at 0x74c16dd5d9b0>((array([1., 1., 1., 1., 1.]) >= 1.9 & array([1., 1., 1., 1., 1.]) <= 2.1))
+E        +    where <function all at 0x74c16dd5d9b0> = np.all
+
+checks/artefact6/test_numerics.py:70: AssertionError
+_______________________ test_second_order_convergence[B] _______________________
+
+case = {'e_th': 10.0, 'e_max': 30.0, 'sigma0': 60.0, 'w0': 5.0}
+
+    def test_second_order_convergence(case):
+        """Ошибка убывает, а все пять оценок порядка лежат в [1,9; 2,1]."""
+        exact = case["sigma0"] / 3.0
+        errors = np.array([abs(average_at(case, n) - exact) for n in GRID_SIZES])
+        assert np.isfinite(errors).all()
+        assert np.all(errors > 0), "Для оценки порядка нужны положительные ошибки"
+        assert np.all(np.diff(errors) < 0), f"Погрешность не убывает: {errors}"
+        orders = np.log2(errors[:-1] / errors[1:])
+        assert np.isfinite(orders).all()
+>       assert np.all((orders >= 1.9) & (orders <= 2.1)), f"Порядки: {orders}"
+E       AssertionError: Порядки: [1. 1. 1. 1. 1.]
+E       assert np.False_
+E        +  where np.False_ = <function all at 0x74c16dd5d9b0>((array([1., 1., 1., 1., 1.]) >= 1.9 & array([1., 1., 1., 1., 1.]) <= 2.1))
+E        +    where <function all at 0x74c16dd5d9b0> = np.all
+
+checks/artefact6/test_numerics.py:70: AssertionError
+_______________________ test_second_order_convergence[C] _______________________
+
+case = {'e_th': 12.0, 'e_max': 60.0, 'sigma0': 240.0, 'w0': 10.0}
+
+    def test_second_order_convergence(case):
+        """Ошибка убывает, а все пять оценок порядка лежат в [1,9; 2,1]."""
+        exact = case["sigma0"] / 3.0
+        errors = np.array([abs(average_at(case, n) - exact) for n in GRID_SIZES])
+        assert np.isfinite(errors).all()
+        assert np.all(errors > 0), "Для оценки порядка нужны положительные ошибки"
+        assert np.all(np.diff(errors) < 0), f"Погрешность не убывает: {errors}"
+        orders = np.log2(errors[:-1] / errors[1:])
+        assert np.isfinite(orders).all()
+>       assert np.all((orders >= 1.9) & (orders <= 2.1)), f"Порядки: {orders}"
+E       AssertionError: Порядки: [1. 1. 1. 1. 1.]
+E       assert np.False_
+E        +  where np.False_ = <function all at 0x74c16dd5d9b0>((array([1., 1., 1., 1., 1.]) >= 1.9 & array([1., 1., 1., 1., 1.]) <= 2.1))
+E        +    where <function all at 0x74c16dd5d9b0> = np.all
+
+checks/artefact6/test_numerics.py:70: AssertionError
+________________________ test_finite_grid_formula[A-10] ________________________
+
+case = {'e_th': 8.0, 'e_max': 20.0, 'sigma0': 120.0, 'w0': 1.0}, n = 10
+
+    @pytest.mark.parametrize("n", GRID_SIZES)
+    def test_finite_grid_formula(case, n):
+        """Проверяем точную формулу результата именно метода трапеций."""
+        expected = case["sigma0"] / 3.0 * (1.0 - 1.0 / n**2)
+>       assert average_at(case, n) == pytest.approx(expected, rel=1e-10, abs=0.0)
+E       assert 36.00000000000001 == 39.6 ± 4.0e-09
+E         
+E         comparison failed
+E         Obtained: 36.00000000000001
+E         Expected: 39.6 ± 4.0e-09
+
+checks/artefact6/test_numerics.py:77: AssertionError
+________________________ test_finite_grid_formula[A-20] ________________________
+
+case = {'e_th': 8.0, 'e_max': 20.0, 'sigma0': 120.0, 'w0': 1.0}, n = 20
+
+    @pytest.mark.parametrize("n", GRID_SIZES)
+    def test_finite_grid_formula(case, n):
+        """Проверяем точную формулу результата именно метода трапеций."""
+        expected = case["sigma0"] / 3.0 * (1.0 - 1.0 / n**2)
+>       assert average_at(case, n) == pytest.approx(expected, rel=1e-10, abs=0.0)
+E       assert 38.00000000000001 == 39.900000000000006 ± 4.0e-09
+E         
+E         comparison failed
+E         Obtained: 38.00000000000001
+E         Expected: 39.900000000000006 ± 4.0e-09
+
+checks/artefact6/test_numerics.py:77: AssertionError
+________________________ test_finite_grid_formula[A-40] ________________________
+
+case = {'e_th': 8.0, 'e_max': 20.0, 'sigma0': 120.0, 'w0': 1.0}, n = 40
+
+    @pytest.mark.parametrize("n", GRID_SIZES)
+    def test_finite_grid_formula(case, n):
+        """Проверяем точную формулу результата именно метода трапеций."""
+        expected = case["sigma0"] / 3.0 * (1.0 - 1.0 / n**2)
+>       assert average_at(case, n) == pytest.approx(expected, rel=1e-10, abs=0.0)
+E       assert 39.0 == 39.975 ± 4.0e-09
+E         
+E         comparison failed
+E         Obtained: 39.0
+E         Expected: 39.975 ± 4.0e-09
+
+checks/artefact6/test_numerics.py:77: AssertionError
+________________________ test_finite_grid_formula[A-80] ________________________
+
+case = {'e_th': 8.0, 'e_max': 20.0, 'sigma0': 120.0, 'w0': 1.0}, n = 80
+
+    @pytest.mark.parametrize("n", GRID_SIZES)
+    def test_finite_grid_formula(case, n):
+        """Проверяем точную формулу результата именно метода трапеций."""
+        expected = case["sigma0"] / 3.0 * (1.0 - 1.0 / n**2)
+>       assert average_at(case, n) == pytest.approx(expected, rel=1e-10, abs=0.0)
+E       assert 39.50000000000001 == 39.99375 ± 4.0e-09
+E         
+E         comparison failed
+E         Obtained: 39.50000000000001
+E         Expected: 39.99375 ± 4.0e-09
+
+checks/artefact6/test_numerics.py:77: AssertionError
+_______________________ test_finite_grid_formula[A-160] ________________________
+
+case = {'e_th': 8.0, 'e_max': 20.0, 'sigma0': 120.0, 'w0': 1.0}, n = 160
+
+    @pytest.mark.parametrize("n", GRID_SIZES)
+    def test_finite_grid_formula(case, n):
+        """Проверяем точную формулу результата именно метода трапеций."""
+        expected = case["sigma0"] / 3.0 * (1.0 - 1.0 / n**2)
+>       assert average_at(case, n) == pytest.approx(expected, rel=1e-10, abs=0.0)
+E       assert 39.75 == 39.9984375 ± 4.0e-09
+E         
+E         comparison failed
+E         Obtained: 39.75
+E         Expected: 39.9984375 ± 4.0e-09
+
+checks/artefact6/test_numerics.py:77: AssertionError
+_______________________ test_finite_grid_formula[A-320] ________________________
+
+case = {'e_th': 8.0, 'e_max': 20.0, 'sigma0': 120.0, 'w0': 1.0}, n = 320
+
+    @pytest.mark.parametrize("n", GRID_SIZES)
+    def test_finite_grid_formula(case, n):
+        """Проверяем точную формулу результата именно метода трапеций."""
+        expected = case["sigma0"] / 3.0 * (1.0 - 1.0 / n**2)
+>       assert average_at(case, n) == pytest.approx(expected, rel=1e-10, abs=0.0)
+E       assert 39.875 == 39.999609375 ± 4.0e-09
+E         
+E         comparison failed
+E         Obtained: 39.875
+E         Expected: 39.999609375 ± 4.0e-09
+
+checks/artefact6/test_numerics.py:77: AssertionError
+________________________ test_finite_grid_formula[B-10] ________________________
+
+case = {'e_th': 10.0, 'e_max': 30.0, 'sigma0': 60.0, 'w0': 5.0}, n = 10
+
+    @pytest.mark.parametrize("n", GRID_SIZES)
+    def test_finite_grid_formula(case, n):
+        """Проверяем точную формулу результата именно метода трапеций."""
+        expected = case["sigma0"] / 3.0 * (1.0 - 1.0 / n**2)
+>       assert average_at(case, n) == pytest.approx(expected, rel=1e-10, abs=0.0)
+E       assert 18.0 == 19.8 ± 2.0e-09
+E         
+E         comparison failed
+E         Obtained: 18.0
+E         Expected: 19.8 ± 2.0e-09
+
+checks/artefact6/test_numerics.py:77: AssertionError
+________________________ test_finite_grid_formula[B-20] ________________________
+
+case = {'e_th': 10.0, 'e_max': 30.0, 'sigma0': 60.0, 'w0': 5.0}, n = 20
+
+    @pytest.mark.parametrize("n", GRID_SIZES)
+    def test_finite_grid_formula(case, n):
+        """Проверяем точную формулу результата именно метода трапеций."""
+        expected = case["sigma0"] / 3.0 * (1.0 - 1.0 / n**2)
+>       assert average_at(case, n) == pytest.approx(expected, rel=1e-10, abs=0.0)
+E       assert 19.0 == 19.950000000000003 ± 2.0e-09
+E         
+E         comparison failed
+E         Obtained: 19.0
+E         Expected: 19.950000000000003 ± 2.0e-09
+
+checks/artefact6/test_numerics.py:77: AssertionError
+________________________ test_finite_grid_formula[B-40] ________________________
+
+case = {'e_th': 10.0, 'e_max': 30.0, 'sigma0': 60.0, 'w0': 5.0}, n = 40
+
+    @pytest.mark.parametrize("n", GRID_SIZES)
+    def test_finite_grid_formula(case, n):
+        """Проверяем точную формулу результата именно метода трапеций."""
+        expected = case["sigma0"] / 3.0 * (1.0 - 1.0 / n**2)
+>       assert average_at(case, n) == pytest.approx(expected, rel=1e-10, abs=0.0)
+E       assert 19.5 == 19.9875 ± 2.0e-09
+E         
+E         comparison failed
+E         Obtained: 19.5
+E         Expected: 19.9875 ± 2.0e-09
+
+checks/artefact6/test_numerics.py:77: AssertionError
+________________________ test_finite_grid_formula[B-80] ________________________
+
+case = {'e_th': 10.0, 'e_max': 30.0, 'sigma0': 60.0, 'w0': 5.0}, n = 80
+
+    @pytest.mark.parametrize("n", GRID_SIZES)
+    def test_finite_grid_formula(case, n):
+        """Проверяем точную формулу результата именно метода трапеций."""
+        expected = case["sigma0"] / 3.0 * (1.0 - 1.0 / n**2)
+>       assert average_at(case, n) == pytest.approx(expected, rel=1e-10, abs=0.0)
+E       assert 19.75 == 19.996875 ± 2.0e-09
+E         
+E         comparison failed
+E         Obtained: 19.75
+E         Expected: 19.996875 ± 2.0e-09
+
+checks/artefact6/test_numerics.py:77: AssertionError
+_______________________ test_finite_grid_formula[B-160] ________________________
+
+case = {'e_th': 10.0, 'e_max': 30.0, 'sigma0': 60.0, 'w0': 5.0}, n = 160
+
+    @pytest.mark.parametrize("n", GRID_SIZES)
+    def test_finite_grid_formula(case, n):
+        """Проверяем точную формулу результата именно метода трапеций."""
+        expected = case["sigma0"] / 3.0 * (1.0 - 1.0 / n**2)
+>       assert average_at(case, n) == pytest.approx(expected, rel=1e-10, abs=0.0)
+E       assert 19.875 == 19.99921875 ± 2.0e-09
+E         
+E         comparison failed
+E         Obtained: 19.875
+E         Expected: 19.99921875 ± 2.0e-09
+
+checks/artefact6/test_numerics.py:77: AssertionError
+_______________________ test_finite_grid_formula[B-320] ________________________
+
+case = {'e_th': 10.0, 'e_max': 30.0, 'sigma0': 60.0, 'w0': 5.0}, n = 320
+
+    @pytest.mark.parametrize("n", GRID_SIZES)
+    def test_finite_grid_formula(case, n):
+        """Проверяем точную формулу результата именно метода трапеций."""
+        expected = case["sigma0"] / 3.0 * (1.0 - 1.0 / n**2)
+>       assert average_at(case, n) == pytest.approx(expected, rel=1e-10, abs=0.0)
+E       assert 19.9375 == 19.9998046875 ± 2.0e-09
+E         
+E         comparison failed
+E         Obtained: 19.9375
+E         Expected: 19.9998046875 ± 2.0e-09
+
+checks/artefact6/test_numerics.py:77: AssertionError
+________________________ test_finite_grid_formula[C-10] ________________________
+
+case = {'e_th': 12.0, 'e_max': 60.0, 'sigma0': 240.0, 'w0': 10.0}, n = 10
+
+    @pytest.mark.parametrize("n", GRID_SIZES)
+    def test_finite_grid_formula(case, n):
+        """Проверяем точную формулу результата именно метода трапеций."""
+        expected = case["sigma0"] / 3.0 * (1.0 - 1.0 / n**2)
+>       assert average_at(case, n) == pytest.approx(expected, rel=1e-10, abs=0.0)
+E       assert 72.00000000000001 == 79.2 ± 7.9e-09
+E         
+E         comparison failed
+E         Obtained: 72.00000000000001
+E         Expected: 79.2 ± 7.9e-09
+
+checks/artefact6/test_numerics.py:77: AssertionError
+________________________ test_finite_grid_formula[C-20] ________________________
+
+case = {'e_th': 12.0, 'e_max': 60.0, 'sigma0': 240.0, 'w0': 10.0}, n = 20
+
+    @pytest.mark.parametrize("n", GRID_SIZES)
+    def test_finite_grid_formula(case, n):
+        """Проверяем точную формулу результата именно метода трапеций."""
+        expected = case["sigma0"] / 3.0 * (1.0 - 1.0 / n**2)
+>       assert average_at(case, n) == pytest.approx(expected, rel=1e-10, abs=0.0)
+E       assert 76.00000000000001 == 79.80000000000001 ± 8.0e-09
+E         
+E         comparison failed
+E         Obtained: 76.00000000000001
+E         Expected: 79.80000000000001 ± 8.0e-09
+
+checks/artefact6/test_numerics.py:77: AssertionError
+________________________ test_finite_grid_formula[C-40] ________________________
+
+case = {'e_th': 12.0, 'e_max': 60.0, 'sigma0': 240.0, 'w0': 10.0}, n = 40
+
+    @pytest.mark.parametrize("n", GRID_SIZES)
+    def test_finite_grid_formula(case, n):
+        """Проверяем точную формулу результата именно метода трапеций."""
+        expected = case["sigma0"] / 3.0 * (1.0 - 1.0 / n**2)
+>       assert average_at(case, n) == pytest.approx(expected, rel=1e-10, abs=0.0)
+E       assert 78.0 == 79.95 ± 8.0e-09
+E         
+E         comparison failed
+E         Obtained: 78.0
+E         Expected: 79.95 ± 8.0e-09
+
+checks/artefact6/test_numerics.py:77: AssertionError
+________________________ test_finite_grid_formula[C-80] ________________________
+
+case = {'e_th': 12.0, 'e_max': 60.0, 'sigma0': 240.0, 'w0': 10.0}, n = 80
+
+    @pytest.mark.parametrize("n", GRID_SIZES)
+    def test_finite_grid_formula(case, n):
+        """Проверяем точную формулу результата именно метода трапеций."""
+        expected = case["sigma0"] / 3.0 * (1.0 - 1.0 / n**2)
+>       assert average_at(case, n) == pytest.approx(expected, rel=1e-10, abs=0.0)
+E       assert 78.99999999999999 == 79.9875 ± 8.0e-09
+E         
+E         comparison failed
+E         Obtained: 78.99999999999999
+E         Expected: 79.9875 ± 8.0e-09
+
+checks/artefact6/test_numerics.py:77: AssertionError
+_______________________ test_finite_grid_formula[C-160] ________________________
+
+case = {'e_th': 12.0, 'e_max': 60.0, 'sigma0': 240.0, 'w0': 10.0}, n = 160
+
+    @pytest.mark.parametrize("n", GRID_SIZES)
+    def test_finite_grid_formula(case, n):
+        """Проверяем точную формулу результата именно метода трапеций."""
+        expected = case["sigma0"] / 3.0 * (1.0 - 1.0 / n**2)
+>       assert average_at(case, n) == pytest.approx(expected, rel=1e-10, abs=0.0)
+E       assert 79.5 == 79.996875 ± 8.0e-09
+E         
+E         comparison failed
+E         Obtained: 79.5
+E         Expected: 79.996875 ± 8.0e-09
+
+checks/artefact6/test_numerics.py:77: AssertionError
+_______________________ test_finite_grid_formula[C-320] ________________________
+
+case = {'e_th': 12.0, 'e_max': 60.0, 'sigma0': 240.0, 'w0': 10.0}, n = 320
+
+    @pytest.mark.parametrize("n", GRID_SIZES)
+    def test_finite_grid_formula(case, n):
+        """Проверяем точную формулу результата именно метода трапеций."""
+        expected = case["sigma0"] / 3.0 * (1.0 - 1.0 / n**2)
+>       assert average_at(case, n) == pytest.approx(expected, rel=1e-10, abs=0.0)
+E       assert 79.75 == 79.99921875 ± 8.0e-09
+E         
+E         comparison failed
+E         Obtained: 79.75
+E         Expected: 79.99921875 ± 8.0e-09
+
+checks/artefact6/test_numerics.py:77: AssertionError
+__________________________ test_separate_integrals[A] __________________________
+
+case = {'e_th': 8.0, 'e_max': 20.0, 'sigma0': 120.0, 'w0': 1.0}
+
+    def test_separate_integrals(case):
+        """Общая ошибка обоих интегралов не должна скрываться в отношении."""
+        energy, sigma, flux = make_model_data(**case, n=320)
+        length = case["e_max"] - case["e_th"]
+        exact_numerator = case["sigma0"] * case["w0"] * length / 6.0
+        exact_denominator = case["w0"] * length / 2.0
+        numerator = trapezoid_integral(energy, sigma * flux)
+        denominator = trapezoid_integral(energy, flux)
+        assert np.isfinite(numerator) and np.isfinite(denominator)
+        assert denominator > 0
+        assert abs(numerator - exact_numerator) / exact_numerator <= 1e-4
+>       assert abs(denominator - exact_denominator) / exact_denominator <= 1e-12
+E       assert (0.018749999999999822 / 6.0) <= 1e-12
+E        +  where 0.018749999999999822 = abs((6.01875 - 6.0))
+
+checks/artefact6/test_numerics.py:91: AssertionError
+__________________________ test_separate_integrals[B] __________________________
+
+case = {'e_th': 10.0, 'e_max': 30.0, 'sigma0': 60.0, 'w0': 5.0}
+
+    def test_separate_integrals(case):
+        """Общая ошибка обоих интегралов не должна скрываться в отношении."""
+        energy, sigma, flux = make_model_data(**case, n=320)
+        length = case["e_max"] - case["e_th"]
+        exact_numerator = case["sigma0"] * case["w0"] * length / 6.0
+        exact_denominator = case["w0"] * length / 2.0
+        numerator = trapezoid_integral(energy, sigma * flux)
+        denominator = trapezoid_integral(energy, flux)
+        assert np.isfinite(numerator) and np.isfinite(denominator)
+        assert denominator > 0
+        assert abs(numerator - exact_numerator) / exact_numerator <= 1e-4
+>       assert abs(denominator - exact_denominator) / exact_denominator <= 1e-12
+E       assert (0.15625 / 50.0) <= 1e-12
+E        +  where 0.15625 = abs((50.15625 - 50.0))
+
+checks/artefact6/test_numerics.py:91: AssertionError
+__________________________ test_separate_integrals[C] __________________________
+
+case = {'e_th': 12.0, 'e_max': 60.0, 'sigma0': 240.0, 'w0': 10.0}
+
+    def test_separate_integrals(case):
+        """Общая ошибка обоих интегралов не должна скрываться в отношении."""
+        energy, sigma, flux = make_model_data(**case, n=320)
+        length = case["e_max"] - case["e_th"]
+        exact_numerator = case["sigma0"] * case["w0"] * length / 6.0
+        exact_denominator = case["w0"] * length / 2.0
+        numerator = trapezoid_integral(energy, sigma * flux)
+        denominator = trapezoid_integral(energy, flux)
+        assert np.isfinite(numerator) and np.isfinite(denominator)
+        assert denominator > 0
+        assert abs(numerator - exact_numerator) / exact_numerator <= 1e-4
+>       assert abs(denominator - exact_denominator) / exact_denominator <= 1e-12
+E       assert (0.75 / 240.0) <= 1e-12
+E        +  where 0.75 = abs((240.75 - 240.0))
+
+checks/artefact6/test_numerics.py:91: AssertionError
+=========================== short test summary info ============================
+FAILED checks/artefact6/test_numerics.py::test_fine_grid_accuracy[A] - Assert...
+FAILED checks/artefact6/test_numerics.py::test_fine_grid_accuracy[B] - Assert...
+FAILED checks/artefact6/test_numerics.py::test_fine_grid_accuracy[C] - Assert...
+FAILED checks/artefact6/test_numerics.py::test_second_order_convergence[A] - ...
+FAILED checks/artefact6/test_numerics.py::test_second_order_convergence[B] - ...
+FAILED checks/artefact6/test_numerics.py::test_second_order_convergence[C] - ...
+FAILED checks/artefact6/test_numerics.py::test_finite_grid_formula[A-10] - as...
+FAILED checks/artefact6/test_numerics.py::test_finite_grid_formula[A-20] - as...
+FAILED checks/artefact6/test_numerics.py::test_finite_grid_formula[A-40] - as...
+FAILED checks/artefact6/test_numerics.py::test_finite_grid_formula[A-80] - as...
+FAILED checks/artefact6/test_numerics.py::test_finite_grid_formula[A-160] - a...
+FAILED checks/artefact6/test_numerics.py::test_finite_grid_formula[A-320] - a...
+FAILED checks/artefact6/test_numerics.py::test_finite_grid_formula[B-10] - as...
+FAILED checks/artefact6/test_numerics.py::test_finite_grid_formula[B-20] - as...
+FAILED checks/artefact6/test_numerics.py::test_finite_grid_formula[B-40] - as...
+FAILED checks/artefact6/test_numerics.py::test_finite_grid_formula[B-80] - as...
+FAILED checks/artefact6/test_numerics.py::test_finite_grid_formula[B-160] - a...
+FAILED checks/artefact6/test_numerics.py::test_finite_grid_formula[B-320] - a...
+FAILED checks/artefact6/test_numerics.py::test_finite_grid_formula[C-10] - as...
+FAILED checks/artefact6/test_numerics.py::test_finite_grid_formula[C-20] - as...
+FAILED checks/artefact6/test_numerics.py::test_finite_grid_formula[C-40] - as...
+FAILED checks/artefact6/test_numerics.py::test_finite_grid_formula[C-80] - as...
+FAILED checks/artefact6/test_numerics.py::test_finite_grid_formula[C-160] - a...
+FAILED checks/artefact6/test_numerics.py::test_finite_grid_formula[C-320] - a...
+FAILED checks/artefact6/test_numerics.py::test_separate_integrals[A] - assert...
+FAILED checks/artefact6/test_numerics.py::test_separate_integrals[B] - assert...
+FAILED checks/artefact6/test_numerics.py::test_separate_integrals[C] - assert...
+27 failed, 155 passed in 0.55s
