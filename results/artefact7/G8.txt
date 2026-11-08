@@ -1,0 +1,39 @@
+G8: независимая проверка подцели EXFOR
+Дата: 2026-11-08
+Исполнитель: ассистент вместо Goose по прямому поручению пользователя
+Ветка: subgoal-g8
+
+1. Команда из дерева
+/home/olesya/venvs/ai4science-week5/bin/python -B -m pytest checks/artefact7 -q -k detects_mutation -p no:cacheprovider
+.......                                                                  [100%]
+7 passed, 8 deselected in 0.20s
+Код завершения: 0
+
+2. Независимые проверки
+G1: committed result read; 181 lines.
+G2: committed result read; 140 lines.
+G3: committed result read; 123 lines.
+G4: committed result read; 94 lines.
+G5: committed result read; 37 lines.
+G6: committed result read; 36 lines.
+G7: committed result read; 33 lines.
+numeric_copy: original accepted; mutant rejected by assertion at assert_numeric_copy:208; OK
+energy_units: original accepted; mutant rejected by assertion at assert_energy_units:225; OK
+selection_rules: original accepted; mutant rejected by assertion at assert_selection_rules:258; OK
+limit_semantics: original accepted; mutant rejected by assertion at assert_limit_semantics:292; OK
+review_queue: original accepted; mutant rejected by assertion at assert_review_queue:310; OK
+exclusion_reason: original accepted; mutant rejected by assertion at assert_exclusion_reason:334; OK
+empty_main: original accepted; mutant rejected by assertion at assert_empty_main:354; OK
+G1 full generated test: relative tolerance x100; detected=False
+G1 full generated test: relative tolerance x1000000; detected=True
+G1 full generated test: relative tolerance tightened; detected=False
+G1 generator: value=n/1000, n=0..1000000; NO-DIM reaches 1000; PER-CENT reaches 10. Earlier G1 report descriptions of a larger generator range are inaccurate.
+G1 does not pin the exact relative tolerance; targeted threshold-boundary tests remain a coverage recommendation. No protected test was changed.
+Код завершения независимого стенда: 0
+
+Метод и ограничения
+Seven required mutations checked in separate in-memory modules. G1-G4 reports are earlier Goose results; G5-G8 were executed by the assistant at the user request, not by four new Goose processes.
+Синтетические записи в памяти; полный аудит реального CSV не выполнялся.
+Исходные данные и checks/ не изменены; контрольные хеши совпали.
+
+Заключение: G8 проверена; штатные тесты прошли, указанные контрольные ошибки обнаружены. Оговорки о покрытии передать основной сессии.
