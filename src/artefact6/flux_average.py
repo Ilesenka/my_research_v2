@@ -95,6 +95,9 @@ def trapezoid_integral(energy, values):
             # Полусумма значений на концах, умноженная на ширину интервала.
             # Деление до сложения уменьшает риск промежуточного переполнения.
             heights = 0.5 * values[:-1] + 0.5 * values[1:]
+            # [намеренная ошибка] крайним узлам задан полный вес вместо половинного
+            heights[0] += 0.5 * values[0]
+            heights[-1] += 0.5 * values[-1]
             result = float(np.sum(widths * heights, dtype=np.float64))
     except FloatingPointError as exc:
         raise ValueError("Переполнение при вычислении интеграла") from exc
