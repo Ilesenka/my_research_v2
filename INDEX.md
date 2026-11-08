@@ -25,3 +25,5 @@
 - `results/artefact4/source_review.md` — обзор статьи `paper/library_artefact3/My_paper_to_compress.pdf` как источника: реакции, продукты, энергии, формат IR, условия и ограничения.
 - `results/artefact4/isomeric_ratios.csv` — экспериментальные IR из таблицы 3 основной статьи и `results/artefact2/table.csv` по Палванову; TALYS исключён.
 - `reports/my_search_report.md` — отчёт поиска по собственной библиотеке OpenAlex с результатами BM25 и векторного поиска.
+- `METHOD.md` — методика проверки усредненного сечения по спектру фотонов.
+- `results/artefact6/` — расчеты, замеры времени и логи проверок; код — `src/artefact6/`, верификатор — `checks/artefact6/`.

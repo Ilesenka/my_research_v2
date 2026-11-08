@@ -1,0 +1,66 @@
+{
+  "stage": "full",
+  "passed": true,
+  "context": {
+    "signature": {
+      "model_sha256": "d82f7584c3947f427ff7adfbfdede0ac5bd7186e94e81ceaa745cd930201f688",
+      "runner_sha256": "267d508c2d884474839793d69d12527bab137b63ec28a756329cc5e00070be7a",
+      "method_0_7_sha256": "db258a8d93bba98aee839d7a2f438e4e636e5372bb5e7b9991315c8a78aba440",
+      "requirements_sha256": "2a9bce20f93d2a7a6a8d4c745d5feb01bc8d524d8fa32c8776b72ca1c7f54a76",
+      "checks_sha256": {
+        "test_model_data.py": "550de71eb208260138b909c5d915fbdf4dc1509a5c4003882a91891d523f2cd4",
+        "test_flux_inputs.py": "61fb859ed5badeac42de6cb538c3562600d9bfabc4cfa4e8adea850004a1222a",
+        "test_numerics.py": "546a6635677c45ee95ae74426d23dc3dc6576c137431124a89bed1efc71ceb4a"
+      },
+      "parameters": {
+        "A": {
+          "e_th": 8.0,
+          "e_max": 20.0,
+          "sigma0": 120.0,
+          "w0": 1.0
+        },
+        "B": {
+          "e_th": 10.0,
+          "e_max": 30.0,
+          "sigma0": 60.0,
+          "w0": 5.0
+        },
+        "C": {
+          "e_th": 12.0,
+          "e_max": 60.0,
+          "sigma0": 240.0,
+          "w0": 10.0
+        }
+      },
+      "grids": [
+        10,
+        20,
+        40,
+        80,
+        160,
+        320
+      ],
+      "python": "3.14.4",
+      "numpy": "2.5.4"
+    },
+    "git_commit": "0366c93e0eacf9488b2fd18a62fc6c19e03ff9b3",
+    "created_utc": "2026-11-08T01:09:50.396387+00:00"
+  },
+  "rows": 18,
+  "csv_sha256": "1a8e4ea6be53c21ed9e06ac9f59e4f328bc1d374c99ea2d5952214e848072c64",
+  "verifier_command": [
+    "/home/olesya/venvs/ai4science-week5/bin/python",
+    "-m",
+    "pytest",
+    "checks/artefact6",
+    "-q",
+    "-p",
+    "no:cacheprovider"
+  ],
+  "verifier_exit_code": 0,
+  "verifier_passed_tests": 182,
+  "verifier_elapsed_s": 0.9519664389954414,
+  "verifier_summary": [
+    "182 passed in 0.45s"
+  ]
+}

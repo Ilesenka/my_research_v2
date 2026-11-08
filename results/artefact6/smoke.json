@@ -1,0 +1,78 @@
+{
+  "stage": "smoke",
+  "passed": true,
+  "context": {
+    "signature": {
+      "model_sha256": "d82f7584c3947f427ff7adfbfdede0ac5bd7186e94e81ceaa745cd930201f688",
+      "runner_sha256": "267d508c2d884474839793d69d12527bab137b63ec28a756329cc5e00070be7a",
+      "method_0_7_sha256": "db258a8d93bba98aee839d7a2f438e4e636e5372bb5e7b9991315c8a78aba440",
+      "requirements_sha256": "2a9bce20f93d2a7a6a8d4c745d5feb01bc8d524d8fa32c8776b72ca1c7f54a76",
+      "checks_sha256": {
+        "test_model_data.py": "550de71eb208260138b909c5d915fbdf4dc1509a5c4003882a91891d523f2cd4",
+        "test_flux_inputs.py": "61fb859ed5badeac42de6cb538c3562600d9bfabc4cfa4e8adea850004a1222a",
+        "test_numerics.py": "546a6635677c45ee95ae74426d23dc3dc6576c137431124a89bed1efc71ceb4a"
+      },
+      "parameters": {
+        "A": {
+          "e_th": 8.0,
+          "e_max": 20.0,
+          "sigma0": 120.0,
+          "w0": 1.0
+        },
+        "B": {
+          "e_th": 10.0,
+          "e_max": 30.0,
+          "sigma0": 60.0,
+          "w0": 5.0
+        },
+        "C": {
+          "e_th": 12.0,
+          "e_max": 60.0,
+          "sigma0": 240.0,
+          "w0": 10.0
+        }
+      },
+      "grids": [
+        10,
+        20,
+        40,
+        80,
+        160,
+        320
+      ],
+      "python": "3.14.4",
+      "numpy": "2.5.4"
+    },
+    "git_commit": "0366c93e0eacf9488b2fd18a62fc6c19e03ff9b3",
+    "created_utc": "2026-11-08T01:09:16.229896+00:00"
+  },
+  "run": {
+    "case_id": "A",
+    "e_th_MeV": 8.0,
+    "e_max_MeV": 20.0,
+    "sigma0_mb": 120.0,
+    "w0": 1.0,
+    "n": 10,
+    "h_MeV": 1.2,
+    "numerator": 237.60000000000002,
+    "denominator": 6.0,
+    "sigma_avg_mb": 39.6,
+    "sigma_exact_mb": 40.0,
+    "abs_error_mb": 0.3999999999999986,
+    "rel_error": 0.009999999999999964,
+    "p_to_next": null,
+    "elapsed_s": 0.0004242430004524067
+  },
+  "timing": {
+    "n1": 40,
+    "n2": 160,
+    "median_t1_s": 0.00011624881101306527,
+    "median_t2_s": 0.00011475150199839846,
+    "kappa": -0.00947768116106709,
+    "predicted_n320_s": 0.000114003481771405,
+    "predicted_sweep_s": 0.0020856018047999527,
+    "scope": "Расчет с метриками, без файлового ввода-вывода, запуска Python и pytest",
+    "limitation": "Два малых размера: накладные расходы и шум могут преобладать; kappa не подгоняется"
+  },
+  "timing_csv_sha256": "5a276fc9a30ba972a1225f316467bc3cf53b0bf875af1aa19f793a3410148422"
+}
