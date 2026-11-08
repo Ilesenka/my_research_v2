@@ -1,0 +1,37 @@
+G5: независимая проверка подцели EXFOR
+Дата: 2026-11-08
+Исполнитель: ассистент вместо Goose по прямому поручению пользователя
+Ветка: subgoal-g5
+
+1. Команда из дерева
+/home/olesya/venvs/ai4science-week5/bin/python -B -m pytest checks/artefact7 -q -k review_queue -p no:cacheprovider
+..                                                                       [100%]
+2 passed, 13 deselected in 0.34s
+Код завершения: 0
+
+2. Независимые проверки
+empty main and empty queue: expected={}; actual={}; OK
+no review issues and empty queue: expected={}; actual={}; OK
+one needs_review: expected={}; actual={}; OK
+excluded still needs review: expected={}; actual={}; OK
+mixed selection and statuses: expected={}; actual={}; OK
+missing required row: expected={'QUEUE_MISSING': 1}; actual={'QUEUE_MISSING': 1}; OK
+empty queue loses two required rows: expected={'QUEUE_MISSING': 2}; actual={'QUEUE_MISSING': 2}; OK
+extra row with no_open_issue: expected={'QUEUE_EXTRA': 1}; actual={'QUEUE_EXTRA': 1}; OK
+unknown row identifier: expected={'QUEUE_EXTRA': 1, 'QUEUE_FIELD_MISMATCH': 1}; actual={'QUEUE_EXTRA': 1, 'QUEUE_FIELD_MISMATCH': 1}; OK
+stale copied field: expected={'QUEUE_FIELD_MISMATCH': 1}; actual={'QUEUE_FIELD_MISMATCH': 1}; OK
+queue order irrelevant: expected={}; actual={}; OK
+Код завершения независимого стенда: 0
+
+3. Контрольные мутации
+missing queue row check disabled: detected
+extra queue row check disabled: detected
+stale field check disabled: detected
+review restricted incorrectly to in_scope: detected
+
+Метод и ограничения
+Independent queue oracle; actual audit queue code executed. CSV reads and source snapshot boundary substituted in memory; no source-phase audit claimed.
+Синтетические записи в памяти; полный аудит реального CSV не выполнялся.
+Исходные данные и checks/ не изменены; контрольные хеши совпали.
+
+Заключение: G5 проверена; штатные тесты прошли, указанные контрольные ошибки обнаружены. Оговорки о покрытии передать основной сессии.
