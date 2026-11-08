@@ -1,0 +1,36 @@
+G6: независимая проверка подцели EXFOR
+Дата: 2026-11-08
+Исполнитель: ассистент вместо Goose по прямому поручению пользователя
+Ветка: subgoal-g6
+
+1. Команда из дерева
+/home/olesya/venvs/ai4science-week5/bin/python -B -m pytest checks/artefact7 -q -k exclusion_reason -p no:cacheprovider
+..                                                                       [100%]
+2 passed, 13 deselected in 0.29s
+Код завершения: 0
+
+2. Независимые проверки
+missing reason: expected={'EXCLUSION_REASON_EMPTY': 1}; actual={'EXCLUSION_REASON_EMPTY': 1}; original values preserved
+empty reason: expected={'EXCLUSION_REASON_EMPTY': 1}; actual={'EXCLUSION_REASON_EMPTY': 1}; original values preserved
+spaces only: expected={'EXCLUSION_REASON_EMPTY': 1}; actual={'EXCLUSION_REASON_EMPTY': 1}; original values preserved
+tabs and line breaks: expected={'EXCLUSION_REASON_EMPTY': 1}; actual={'EXCLUSION_REASON_EMPTY': 1}; original values preserved
+unicode whitespace: expected={'EXCLUSION_REASON_EMPTY': 1}; actual={'EXCLUSION_REASON_EMPTY': 1}; original values preserved
+valid reason: expected={}; actual={}; original values preserved
+lower out-of-range energy: expected={}; actual={}; original values preserved
+product outside range: expected={'EXCLUSION_REASON_EMPTY': 1}; actual={'EXCLUSION_REASON_EMPTY': 1}; original values preserved
+unknown energy plus rejected Z: expected={}; actual={}; original values preserved
+in_scope does not need rejection reason: expected={}; actual={}; original values preserved
+pending does not need rejection reason: expected={}; actual={}; original values preserved
+Код завершения независимого стенда: 0
+
+3. Контрольные мутации
+reason check disabled: detected
+whitespace no longer stripped: detected
+wrong selection status: detected
+
+Метод и ограничения
+Independent point records with DATA column 1; real check_point executed. Only existence of the synthetic source file was substituted. Presence of a reason is checked, not scientific truth of its wording.
+Синтетические записи в памяти; полный аудит реального CSV не выполнялся.
+Исходные данные и checks/ не изменены; контрольные хеши совпали.
+
+Заключение: G6 проверена; штатные тесты прошли, указанные контрольные ошибки обнаружены. Оговорки о покрытии передать основной сессии.
