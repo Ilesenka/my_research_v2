@@ -9,3 +9,4 @@ paper/*.pdf
 paper/**/*.pdf
 /paper/library_artefact3/My_paper_to_compress.txt
 /paper/parts/
+/initial_data/artefact7/EXFOR_table_with_IR.csv
